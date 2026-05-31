@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Susan Pro — Simulasi Harga Packaging</title>
+<style>
+:root{color-scheme:light}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#FAF8F4;color:#2C1A0E;min-height:100vh;font-size:15px;line-height:1.5}
+.wrap{max-width:620px;margin:0 auto;padding:0 0 3rem}
+.hdr{background:#fff;border-bottom:1px solid #E8E2D9;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-box{width:32px;height:32px;background:#C9A84C;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.hdr-box svg{width:18px;height:18px;fill:#fff}
+.hdr-name{font-size:16px;font-weight:600;color:#2C1A0E;letter-spacing:-.3px}
+.hdr-tag{font-size:11px;color:#9A7B1A;background:#FDF3D7;padding:3px 9px;border-radius:20px;font-weight:500}
+.prog{display:flex;align-items:flex-start;padding:1.25rem 1.5rem 0;gap:0}
+.ps{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;position:relative}
+.ps:not(:last-child)::after{content:'';position:absolute;top:14px;left:calc(50% + 14px);right:calc(-50% + 14px);height:1px;background:#E8E2D9}
+.pd{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;transition:all .2s;z-index:1}
+.pd.done{background:#9A7B1A;color:#fff}
+.pd.active{background:#fff;border:2.5px solid #C9A84C;color:#9A7B1A}
+.pd.todo{background:#F0EBE3;color:#B8A898;border:1px solid #E0D8CD}
+.pl{font-size:10px;color:#B8A898;text-align:center;max-width:52px}
+.pl.active{color:#9A7B1A;font-weight:500}
+.card{background:#fff;border:1px solid #E8E2D9;border-radius:14px;margin:1rem 1.5rem 0;overflow:hidden}
+.card-body{padding:1.25rem 1.5rem}
+.step-title{font-size:17px;font-weight:600;margin-bottom:3px}
+.step-sub{font-size:13px;color:#7A6658;margin-bottom:1.1rem}
+.df{margin-bottom:1rem}
+.df:last-child{margin-bottom:0}
+.df label{font-size:11px;font-weight:600;color:#7A6658;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.df input[type=text],.df input[type=number]{width:100%;padding:10px 12px;border:1.5px solid #E8E2D9;border-radius:9px;font-size:14px;background:#fff;color:#2C1A0E;outline:none;transition:border-color .15s;font-family:inherit}
+.df input:focus{border-color:#C9A84C;box-shadow:0 0 0 3px #C9A84C14}
+.df textarea{width:100%;padding:10px 12px;border:1.5px solid #E8E2D9;border-radius:9px;font-size:13px;background:#fff;color:#2C1A0E;outline:none;transition:border-color .15s;font-family:inherit;resize:vertical;min-height:110px;line-height:1.6}
+.df textarea:focus{border-color:#C9A84C;box-shadow:0 0 0 3px #C9A84C14}
+.df textarea::placeholder{color:#C4B8AC}
+.df input::placeholder{color:#C4B8AC}
+/* Drop zone */
+.dz{border:2px dashed #DDD5C8;border-radius:11px;padding:1.2rem;text-align:center;cursor:pointer;transition:all .2s;background:#FAFAF8;position:relative}
+.dz:hover,.dz.over{border-color:#C9A84C;background:#FEFBF3}
+.dz-icon{font-size:26px;margin-bottom:6px;display:block}
+.dz-text{font-size:13px;color:#7A6658;margin-bottom:3px}
+.dz-text u{color:#9A7B1A;cursor:pointer}
+.dz-types{font-size:11px;color:#B8A898;display:block}
+.dz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #E8E2D9;border-radius:20px;padding:5px 10px 5px 8px;font-size:12px;color:#2C1A0E;max-width:200px}
+.chip-icon{font-size:14px;flex-shrink:0}
+.chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.chip-x{width:16px;height:16px;border-radius:50%;background:#F0EBE3;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:#7A6658;flex-shrink:0;padding:0}
+.chip-x:hover{background:#E8D8A8;color:#5A3A00}
+.img-preview{width:40px;height:40px;border-radius:5px;object-fit:cover;border:1px solid #E8E2D9;flex-shrink:0}
+/* Box types */
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tc{padding:1rem;border:1.5px solid #E8E2D9;border-radius:10px;cursor:pointer;transition:all .15s;background:#fff}
+.tc:hover{border-color:#C9A84C;background:#FEFBF3}
+.tc.sel{border-color:#C9A84C;background:#FEFBF3;box-shadow:0 0 0 3px #C9A84C18}
+.tc-icon{font-size:24px;margin-bottom:7px;display:block}
+.tc h3{font-size:13px;font-weight:600;margin-bottom:2px;color:#2C1A0E}
+.tc p{font-size:11px;color:#7A6658}
+/* Dimensions */
+.dr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:.9rem}
+.box-preview{background:#FEFBF3;border:1px solid #E8E2D9;border-radius:10px;padding:.75rem;margin-top:.5rem}
+.box-note{font-size:11px;color:#B8A898;text-align:center;margin-top:4px}
+/* Materials */
+.ms{margin-bottom:1rem}
+.ms h4{font-size:11px;font-weight:600;color:#9A7B1A;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid #F0EBE3}
+.mg{display:flex;flex-direction:column;gap:5px}
+.mo{padding:9px 12px;border:1.5px solid #E8E2D9;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .15s;background:#fff}
+.mo:hover{border-color:#C9A84C;background:#FEFBF3}
+.mo.sel{border-color:#C9A84C;background:#FEFBF3;box-shadow:0 0 0 3px #C9A84C12}
+.mo-name{font-size:13px;font-weight:500;color:#2C1A0E}
+.mo-cat{font-size:11px;color:#7A6658;margin-top:1px}
+.mo-right{text-align:right;flex-shrink:0;margin-left:10px}
+.mo-price{font-size:12px;font-weight:600;color:#9A7B1A}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500;margin-top:2px}
+.badge-p{background:#FDF3D7;color:#9A7B1A}
+.badge-s{background:#E8F5EE;color:#2E7D6E}
+.badge-e{background:#F3F1EE;color:#7A6658}
+/* Accessories */
+.ai{border:1.5px solid #E8E2D9;border-radius:10px;overflow:hidden;margin-bottom:8px;background:#fff}
+.at{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer}
+.at:hover{background:#FEFBF3}
+.at h4{font-size:13px;font-weight:500;margin-bottom:2px}
+.at p{font-size:11px;color:#7A6658}
+.tog{width:40px;height:22px;border-radius:11px;background:#E8E2D9;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s}
+.tog.on{background:#C9A84C}
+.tog::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog.on::after{transform:translateX(18px)}
+.as{padding:12px 14px;border-top:1px solid #F0EBE3;background:#FEFBF3}
+.as-note{font-size:11px;color:#B8A898;margin-top:4px}
+/* Quantity */
+.qty-num{font-size:52px;font-weight:700;color:#9A7B1A;text-align:center;line-height:1;margin:1rem 0 2px}
+.qty-lbl{font-size:12px;color:#7A6658;text-align:center;margin-bottom:1rem}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:#E8E2D9;border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#C9A84C;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.tier-ticks{display:flex;justify-content:space-between;font-size:10px;color:#B8A898;margin-top:4px;padding:0 1px}
+.tp{border:1px solid #E8E2D9;border-radius:10px;overflow:hidden;margin-top:1rem}
+.tr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #F0EBE3;font-size:13px;background:#fff}
+.tr:last-child{border-bottom:none}
+.tr.at-tier{background:#FEFBF3;border-left:3px solid #C9A84C}
+.tr.at-tier .t-price{font-weight:600;color:#9A7B1A}
+.t-lbl{color:#7A6658}
+.tr.at-tier .t-lbl{color:#9A7B1A;font-weight:500}
+/* Nav */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem}
+.btn-gold{background:#C9A84C;color:#3D2314;border:none;padding:11px 24px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:opacity .15s}
+.btn-gold:hover{opacity:.9}
+.btn-gold:disabled{opacity:.35;cursor:not-allowed}
+.btn-ghost{background:#fff;border:1.5px solid #E8E2D9;padding:10px 20px;border-radius:9px;font-size:14px;cursor:pointer;color:#2C1A0E;display:inline-flex;align-items:center;gap:7px;transition:all .15s}
+.btn-ghost:hover{border-color:#C9A84C;color:#9A7B1A}
+/* Result */
+.result-wrap{padding:0 1.5rem}
+.r-back{display:flex;align-items:center;gap:8px;padding:1rem 0 .75rem;font-size:12px;color:#7A6658}
+.r-back button{background:none;border:1.5px solid #E8E2D9;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;color:#7A6658;display:flex;align-items:center;gap:5px}
+.r-back button:hover{border-color:#C9A84C;color:#9A7B1A}
+.hero{background:#FEF9EF;border:1.5px solid #E8D89A;border-radius:14px;padding:1.5rem;text-align:center;margin-bottom:1rem}
+.hero-lbl{font-size:11px;color:#9A7B1A;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.hero-price{font-size:44px;font-weight:700;color:#2C1A0E;line-height:1;margin-bottom:4px}
+.hero-price span{font-size:20px;font-weight:400;color:#7A6658}
+.hero-total{font-size:14px;color:#7A6658;margin-bottom:8px}
+.hero-hpp{font-size:11px;color:#B8A898;padding-top:8px;border-top:1px solid #E8D89A}
+.tier-table{border:1px solid #E8E2D9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.tier-row{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-bottom:1px solid #F0EBE3;background:#fff;font-size:13px}
+.tier-row:last-child{border-bottom:none}
+.tier-row.active{background:#FEFBF3;border-left:3px solid #C9A84C}
+.tier-row.active .t-p{color:#9A7B1A;font-weight:600}
+.t-p{font-weight:500}
+.t-badge{font-size:10px;background:#C9A84C22;color:#9A7B1A;padding:2px 8px;border-radius:10px;font-weight:500}
+.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem}
+.metric{background:#fff;border:1px solid #E8E2D9;border-radius:10px;padding:10px 12px;text-align:center}
+.m-lbl{font-size:10px;color:#B8A898;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.m-val{font-size:14px;font-weight:600;color:#2C1A0E}
+.section-lbl{font-size:13px;font-weight:600;color:#7A6658;margin:.9rem 0 6px}
+.breakdown{border:1px solid #E8E2D9;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.bd-header{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;cursor:pointer;background:#fff;font-size:13px;font-weight:500;user-select:none}
+.bd-header:hover{background:#FAFAF8}
+.bd-header svg{transition:transform .2s;flex-shrink:0}
+.bd-header.open svg{transform:rotate(180deg)}
+.bd-body{border-top:1px solid #F0EBE3}
+.bd-row{display:flex;justify-content:space-between;padding:8px 15px;border-bottom:1px solid #F5F2EE;font-size:12px;background:#fff}
+.bd-row:last-child{border-bottom:none}
+.bd-row.tot{font-weight:600;background:#FAFAF8}
+.bd-row .lbl{color:#7A6658}
+.alt-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:1.5rem}
+.alt-card{background:#fff;border:1.5px solid #E8E2D9;border-radius:11px;padding:12px 14px;transition:all .15s}
+.alt-card:hover{border-color:#C9A84C;box-shadow:0 2px 8px #C9A84C18}
+.alt-title{font-size:12px;font-weight:600;color:#2C1A0E;margin-bottom:3px}
+.alt-desc{font-size:11px;color:#7A6658;margin-bottom:8px;line-height:1.4}
+.alt-price{font-size:15px;font-weight:700;color:#9A7B1A}
+.alt-diff{font-size:11px;margin-top:2px}
+.alt-cheaper{color:#2E7D6E}
+.alt-pricier{color:#9A7B1A}
+.brief-summary{background:#F5F0E8;border-radius:10px;padding:.8rem 1rem;margin-bottom:.9rem;font-size:12px;color:#5A3E2B;line-height:1.5;border:1px solid #E8D8B8}
+.brief-summary strong{display:block;font-size:11px;font-weight:600;color:#9A7B1A;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.disclaimer{background:#F3F1EE;border-radius:10px;padding:.9rem 1rem;margin-top:1rem;font-size:11px;color:#7A6658;line-height:1.5;border:1px solid #E8E2D9}
+.disclaimer strong{color:#2C1A0E}
+/* AI styles */
+.ai-btn{width:100%;background:#2C1A0E;color:#C9A84C;border:none;padding:12px 20px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:1rem;transition:opacity .15s}
+.ai-btn:hover{opacity:.88}
+.ai-btn:disabled{opacity:.32;cursor:not-allowed}
+.ai-spin{width:16px;height:16px;border:2px solid #C9A84C44;border-top:2px solid #C9A84C;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-result{background:#FEF9EF;border:1.5px solid #E8D89A;border-radius:12px;padding:1rem 1.1rem;margin-top:1rem}
+.ai-result-title{font-size:11px;font-weight:600;color:#9A7B1A;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.7rem;display:flex;align-items:center;gap:6px}
+.ai-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #F0EAD8;font-size:12px}
+.ai-row:last-child{border-bottom:none}
+.ai-row-lbl{color:#7A6658}
+.ai-row-val{font-weight:500;color:#2C1A0E;text-align:right}
+.ai-blank{color:#C4B8AC;font-style:italic}
+.ai-hint{display:inline-block;font-size:10px;background:#2C1A0E;color:#C9A84C;padding:1px 6px;border-radius:6px;margin-left:5px;font-weight:500;vertical-align:middle}
+.ai-err{background:#FEF0EE;border:1px solid #F5C1B3;border-radius:10px;padding:.9rem 1rem;margin-top:1rem;font-size:12px;color:#7A2010}
+.mo.ai-pre{border-color:#C9A84C66;background:#FEFBF3}
+.tc.ai-pre{border-color:#C9A84C66;background:#FEFBF3}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-box">
+        <svg viewBox="0 0 24 24"><path d="M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" fill="none" stroke="#fff" stroke-width="1.5"/><line x1="9" y1="9" x2="15" y2="9" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="12" x2="15" y2="12" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><line x1="9" y1="15" x2="12" y2="15" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </div>
+      <span class="hdr-name">Susan Pro</span>
+    </div>
+    <span class="hdr-tag">Simulasi Harga Packaging</span>
+  </div>
+  <div id="root"></div>
+</div>
+
+<script>
+const STEPS=['Brief','Tipe Box','Dimensi','Material','Aksesoris','Kuantitas']
+
+// Panel allowances berdasarkan data mentah Excel (diverifikasi 30 Mei 2026):
+// RANGKA    : 0 allowance — board dipotong persis ukuran box
+// KRAFT     : 0 allowance — kraft dipotong persis ukuran muka box
+// PEL LUAR  : pw = p+t+10.5, lw = l+t*2+34  (Slip In, tervalidasi)
+//             pw = p*2+t*2+7, lw = l+6       (Flap wrap-around, tervalidasi)
+// PEL DALAM : pw = p+t+8.5,  lw = l+t*2+32  (Slip In, tervalidasi)
+// Slorok & Hampers: rangka+kraft dikoreksi, pelapis masih estimasi
+
+const BT=[
+  {id:'flap',icon:'📦',name:'Box Flap',desc:'Tutup depan, paling umum',
+   panels:(p,l,t)=>[
+    // Rangka: +1cm saja (toleransi potong) — verified dari data
+    {n:'Rangka Tutup',m:'rk',pw:p+1,lw:l+1,q:1,g:0},
+    {n:'Rangka Alas',m:'rk',pw:p,lw:l,q:1,g:0},
+    {n:'Rangka Samping',m:'rk',pw:t,lw:l,q:4,g:0},
+    // Kraft: 0 allowance — verified (bukan +6cm)
+    {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},
+    // Pel Luar: wrap keliling semua sisi tutup — verified dari BOX 1an
+    // pw = p*2 + t*2 + 7 (wrap full), lw = l + 6 (fold 3cm tiap sisi)
+    {n:'Pelapis Luar',m:'ou',pw:p*2+t*2+7,lw:l+6,q:1,g:1.11},
+    // Pel strip dinding dalam
+    {n:'Pel Strip',m:'ou',pw:t+l+6,lw:l+3,q:1,g:1.11},
+    // Dalam: formula sama dengan Slip In
+    {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:1,g:1.11}
+   ],lab:()=>44000},  // verified dari file: rakit 8rb+pel 35rb+pbb 1rb=44rb (tanpa magnet)
+  {id:'slip_in',icon:'🗂',name:'Box Slip In',desc:'Sliding masuk, elegan',
+   panels:(p,l,t)=>[
+    // Semua formula tervalidasi dari file Box Slip In 30×30×5
+    {n:'Rangka Atas/Bawah',m:'rk',pw:p,lw:l,q:2,g:0},       // 0 allowance
+    {n:'Rangka Samping',m:'rk',pw:t,lw:l,q:4,g:0},           // 0 allowance
+    {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},           // 0 allowance — verified
+    {n:'Pel Luar Bawah',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},  // verified ✓
+    {n:'Pel Luar Atas',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},   // verified ✓
+    {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:1,g:1.11}     // verified ✓
+   ],lab:()=>35000},  // verified dari file: flat Rp 35.000 untuk ~30×30×5
+  {id:'slorok',icon:'🪣',name:'Box Slorok',desc:'Laci/drawer, statement',
+   panels:(p,l,t)=>[
+    // Rangka: +0-1cm (dikoreksi dari +4-6cm)
+    {n:'Rangka Selongsong',m:'rk',pw:p+1,lw:l+1,q:2,g:0},
+    {n:'Rangka Laci',m:'rk',pw:p,lw:t,q:2,g:0},
+    {n:'Skat Dalam',m:'rk',pw:p,lw:l,q:1,g:0},
+    // Kraft: 0 allowance (dikoreksi dari +6cm)
+    {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},
+    // Pelapis: estimasi (belum tervalidasi dari file — perlu konfirmasi Susan Pro)
+    {n:'Pel Selongsong',m:'ou',pw:p+t*2+16,lw:l+t*2+34,q:1,g:1.11},
+    {n:'Pel Laci Luar',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},
+    {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:2,g:1.11}
+   ],lab:(p,l,t)=>50000+p*l*t*0.06},
+  {id:'hampers',icon:'🎁',name:'Box Hampers',desc:'Box besar gift set',
+   panels:(p,l,t)=>[
+    // Rangka: 0 allowance (dikoreksi)
+    {n:'Rangka Utama',m:'rk',pw:p,lw:l,q:2,g:0},
+    {n:'Rangka Samping',m:'rk',pw:t,lw:l,q:4,g:0},
+    // Kraft: 0 allowance (dikoreksi dari +8cm)
+    {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},
+    // Pelapis: estimasi mengacu formula Flap
+    {n:'Pelapis Luar',m:'ou',pw:p*2+t*2+7,lw:l+6,q:1,g:1.11},
+    {n:'Pel Tutup',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},
+    {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:1,g:1.11}
+   ],lab:(p,l,t)=>55000+p*l*t*0.10},
+]
+
+const OM=[
+  {id:'brillianta',n:'Brillianta',c:'Kain Premium',p:24.5},
+  {id:'feather',n:'Feather',c:'Kain Premium Import',p:17.7},
+  {id:'imperial',n:'Imperial',c:'Kain Imitasi Premium',p:15.0},
+  {id:'bludru',n:'Bludru Jkt',c:'Kain Beludru',p:3.7},
+  {id:'linemaster',n:'Linemaster',c:'Kain Imitasi Standar',p:3.5},
+  {id:'blinen',n:'Black Linen 250',c:'Kain Linen',p:1.3},
+  {id:'ac310',n:'Art Carton 310',c:'Kertas Karton',p:0.7},
+]
+const IM=[
+  {id:'blinen',n:'Black Linen 250',c:'Kain Linen',p:1.3},
+  {id:'fur100',n:'Furing 100',c:'Kain Furing Standar',p:0.7},
+  {id:'fur50',n:'Furing 50',c:'Kain Furing Tipis',p:0.3},
+  {id:'ac230',n:'Art Carton 230',c:'Kertas Karton',p:0.6},
+  {id:'dc250',n:'DC 250',c:'Kertas DC',p:0.4},
+]
+const RM=[
+  {id:'mdf3',n:'MDF 3mm',c:'Papan Rigid Premium',p:3.5},
+  {id:'gb1500',n:'Grey Board 1500',c:'Papan Hard',p:2.5},
+  {id:'gb30',n:'Grey Board 30',c:'Papan Medium',p:1.7},
+  {id:'chip350',n:'Chipboard 350',c:'Papan Ringan',p:1.0},
+]
+
+let API_KEY = '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'
+const IN_COWORK = typeof window.cowork !== 'undefined' && typeof window.cowork.askClaude === 'function'
+
+let S={
+  step:1,
+  clientName:'',briefText:'',files:[],
+  bt:null,p:30,l:30,t:5,
+  ou:null,in:null,rk:null,
+  logo:false,lp:8,ll:8,mag:false,rib:false,
+  qty:100,bdOpen:false,result:null,
+  aiState:null,   // null | 'loading' | 'done' | 'error'
+  aiResult:null,  // parsed JSON dari AI
+  aiError:null,   // pesan error detail
+  aiApplied:false // apakah hasil AI sudah diapply ke form
+}
+
+const f=n=>Math.round(n).toLocaleString('id-ID')
+const r5=n=>Math.ceil(n/500)*500
+// Format harga per cm² — jaga desimal agar 0.3, 0.7, 1.3 tidak dibulatkan jadi 0/1
+const fCm2=n=>{
+  if(n>=100) return Math.round(n).toLocaleString('id-ID')
+  if(n>=10)  return n.toLocaleString('id-ID',{minimumFractionDigits:0,maximumFractionDigits:1})
+  return n.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})
+}
+
+// Load PDF.js dari cdnjs (lazy — hanya saat ada PDF)
+let _pdfjsReady = null
+function loadPdfJs(){
+  if(_pdfjsReady) return _pdfjsReady
+  _pdfjsReady = new Promise((res, rej)=>{
+    if(window.pdfjsLib){ res(window.pdfjsLib); return }
+    const VER = '3.11.174'
+    const BASE = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${VER}`
+    const s = document.createElement('script')
+    s.src = `${BASE}/pdf.min.js`
+    s.onload = ()=>{
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = `${BASE}/pdf.worker.min.js`
+      res(window.pdfjsLib)
+    }
+    s.onerror = ()=>{ _pdfjsReady=null; rej(new Error('PDF.js gagal dimuat')) }
+    document.head.appendChild(s)
+  })
+  return _pdfjsReady
+}
+
+// Render setiap halaman PDF menjadi base64 JPEG
+async function extractPdfPages(file){
+  const lib = await loadPdfJs()
+  const buf = await readFileAs(file,'arraybuffer')
+  const pdf = await lib.getDocument({data: buf}).promise
+  const pages = []
+  const total = Math.min(pdf.numPages, 10)  // max 10 halaman
+  for(let i=1; i<=total; i++){
+    const page = await pdf.getPage(i)
+    // Render di skala 0.8 agar tidak terlalu besar
+    const vp = page.getViewport({scale:0.8})
+    const canvas = document.createElement('canvas')
+    canvas.width = vp.width; canvas.height = vp.height
+    await page.render({canvasContext: canvas.getContext('2d'), viewport: vp}).promise
+    pages.push({page:i, data: canvas.toDataURL('image/jpeg', 0.75)})
+  }
+  return pages
+}
+
+// Helper: baca file sebagai teks atau dataURL
+function readFileAs(file, mode){
+  return new Promise((res,rej)=>{
+    const r=new FileReader()
+    r.onload=e=>res(e.target.result)
+    r.onerror=rej
+    if(mode==='text') r.readAsText(file)
+    else if(mode==='dataurl') r.readAsDataURL(file)
+    else r.readAsArrayBuffer(file)
+  })
+}
+
+// Ekstrak teks kasar dari DOCX (ZIP+XML) tanpa library
+async function extractDocxText(file){
+  try{
+    const text=await readFileAs(file,'text')
+    // Hapus XML tags, ambil teks yang tersisa
+    return text.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().substring(0,3000)
+  }catch(e){ return '' }
+}
+
+// Panggil Anthropic API langsung (fallback saat tidak ada window.cowork)
+async function callAnthropicDirect(prompt, imgDataUrls=[]){
+  if(!API_KEY) throw new Error('API key belum diisi. Masukkan Anthropic API key di pengaturan.')
+  const content = []
+  // Lampirkan gambar (vision)
+  for(const dataUrl of imgDataUrls){
+    const [hdr, b64] = dataUrl.split(',')
+    const mt = hdr.match(/:(.*?);/)?.[1] || 'image/jpeg'
+    // Hanya kirim gambar yang tidak terlalu besar (max ~1MB base64)
+    if(b64 && b64.length < 1400000){
+      content.push({type:'image', source:{type:'base64', media_type:mt, data:b64}})
+    }
+  }
+  content.push({type:'text', text:prompt})
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:1024,
+      messages:[{role:'user', content}]
+    })
+  })
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}))
+    throw new Error(err.error?.message || `API error ${res.status}`)
+  }
+  const data = await res.json()
+  return data.content?.[0]?.text || ''
+}
+
+function canAnalyze(){ return S.briefText.trim().length>5 || S.files.length>0 }
+function updateAiBtn(){ const b=document.getElementById('ai-btn'); if(b) b.disabled=!canAnalyze() }
+
+async function analyzeWithAI(){
+  if(!canAnalyze()) return
+  S.aiState='loading'; S.aiResult=null; S.aiError=null; rapp()
+
+  // --- Proses file yang diupload ---
+  const dataArr = []   // teks/konten untuk data[] parameter askClaude
+  const imgArr  = []   // base64 gambar untuk data[] parameter
+  const fileSections = []
+
+  for(const file of S.files){
+    const ext=(file.name.split('.').pop()||'').toLowerCase()
+    const isImg=['jpg','jpeg','png','webp','gif'].includes(ext)
+    const isTxt=['txt','md','csv'].includes(ext)
+    const isDocx=['doc','docx'].includes(ext)
+    const isPdf=ext==='pdf'
+
+    if(isImg){
+      // Gambar: baca sebagai dataURL, sertakan di data[] untuk multimodal
+      try{
+        const dataUrl=await readFileAs(file,'dataurl')
+        imgArr.push(dataUrl)
+        fileSections.push(`[GAMBAR: ${file.name} — analisis visual: bentuk box, material, warna, ornamen yang terlihat]`)
+      }catch(e){ fileSections.push(`[GAMBAR: ${file.name} — gagal dibaca]`) }
+    } else if(isTxt){
+      try{
+        const text=await readFileAs(file,'text')
+        const excerpt=text.substring(0,2000)
+        dataArr.push(excerpt)
+        fileSections.push(`[FILE TEKS: ${file.name}]\n${excerpt}`)
+      }catch(e){ fileSections.push(`[FILE: ${file.name} — gagal dibaca]`) }
+    } else if(isDocx){
+      try{
+        const text=await extractDocxText(file)
+        if(text.length>50){
+          dataArr.push(text)
+          fileSections.push(`[DOKUMEN WORD: ${file.name}]\n${text.substring(0,2000)}`)
+        } else {
+          fileSections.push(`[DOKUMEN WORD: ${file.name} — isi tidak dapat diekstrak]`)
+        }
+      }catch(e){ fileSections.push(`[DOKUMEN: ${file.name} — gagal dibaca]`) }
+    } else if(isPdf){
+      try{
+        const pages = await extractPdfPages(file)
+        // Kirim semua halaman sebagai gambar
+        for(const pg of pages){
+          imgArr.push(pg.data)
+        }
+        fileSections.push(`[PDF: ${file.name} — ${pages.length} halaman dirender sebagai gambar, analisis setiap halaman yang relevan, fokus pada halaman yang menampilkan gambar atau foto produk/packaging]`)
+      } catch(e){
+        console.error('PDF render error:', e)
+        fileSections.push(`[PDF: ${file.name} — gagal dirender (${e.message}). Abaikan konten file ini.]`)
+      }
+    } else {
+      fileSections.push(`[FILE: ${file.name}]`)
+    }
+  }
+
+  // --- Bangun prompt ---
+  const matOpts=[
+    'brillianta=Kain Premium Rp24.5/cm²','feather=Kain Premium Import Rp17.7/cm²',
+    'imperial=Kain Imitasi Premium Rp15/cm²','bludru=Bludru Jkt beludru Rp3.7/cm²',
+    'linemaster=Linemaster imitasi Rp3.5/cm²','blinen=Black Linen 250 Rp1.3/cm²',
+    'ac310=Art Carton 310 kertas Rp0.7/cm²'
+  ].join(', ')
+  const inOpts=['blinen=Black Linen Rp1.3/cm²','fur100=Furing 100 Rp0.7/cm²',
+    'fur50=Furing 50 Rp0.3/cm²','ac230=Art Carton 230 Rp0.6/cm²','dc250=DC 250 Rp0.4/cm²'].join(', ')
+  const rkOpts='mdf3=MDF 3mm rigid premium Rp3.5/cm², gb1500=Grey Board 1500 hard Rp2.5/cm², gb30=Grey Board 30 medium Rp1.7/cm², chip350=Chipboard ringan Rp1/cm²'
+  const btOpts='flap=box tutup depan, slip_in=box sliding masuk, slorok=box laci/drawer, hampers=box besar hampers'
+
+  const briefSection=S.briefText.trim()?`BRIEF TEKS CLIENT:\n"${S.briefText}"\n\n`:''
+  const fileSection=fileSections.length?`FILE REFERENSI:\n${fileSections.join('\n\n')}\n\n`:''
+
+  const prompt=`Kamu adalah sistem pricing Susan Pro, produsen box packaging premium Indonesia.
+Analisis semua input berikut dan ekstrak spesifikasi box. Kembalikan HANYA JSON valid, tidak ada teks lain.
+
+OPSI TERSEDIA:
+Tipe box (bt): ${btOpts}
+Material luar (ouId): ${matOpts}
+Material dalam (inId): ${inOpts}
+Rangka (rkId): ${rkOpts}
+
+${briefSection}${fileSection}ATURAN DIMENSI — SANGAT PENTING:
+- Semua dimensi dalam SENTIMETER (cm), bukan mm, bukan pixel, bukan inch
+- Batas wajar box packaging: p=10–70cm, l=10–70cm, t=3–30cm
+- Box kecil (souvenir, undangan): 10–20cm
+- Box sedang (hampers 1-2 item): 20–35cm
+- Box besar (hampers premium): 30–50cm
+- JANGAN gunakan angka dari resolusi gambar/pixel sebagai dimensi
+- Jika dimensi tersebut tidak disebutkan eksplisit dalam teks atau tidak bisa diestimasi wajar dari konteks: gunakan null
+- Contoh dimensi wajar untuk hampers premium: p=35, l=35, t=10
+
+ATURAN MATERIAL & LAINNYA:
+- Gabungkan informasi dari teks brief DAN file referensi
+- Untuk gambar/foto: identifikasi tipe box, material, warna, ornamen yang terlihat
+- Warna gelap/navy/hitam/charcoal → bludru atau blinen
+- Motif/pattern/tekstur premium → feather/imperial/brillianta
+- Ekonomis/sederhana → linemaster/ac310
+- Logo foil: true jika ada kata foil/logo/emboss/cetak atau terlihat di gambar
+- qty: null jika tidak disebutkan, ambil angka terkecil jika ada range
+- Budget: pilih material yang HPP ≤ budget×0.6
+
+OUTPUT JSON (HANYA JSON, tidak ada penjelasan):
+{"bt":"string|null","p":number|null,"l":number|null,"t":number|null,"ouId":"string|null","inId":"string|null","rkId":"string|null","logo":bool,"lp":number,"ll":number,"mag":bool,"rib":bool,"qty":number|null,"catatan":"ringkasan deteksi + alasan pemilihan material dan estimasi dimensi"}`
+
+  // Gabungkan data: teks file + gambar base64
+  const allData=[...dataArr,...imgArr]
+
+  try{
+    let rawText = ''
+    if(IN_COWORK){
+      // Mode Cowork: gunakan window.cowork.askClaude
+      const raw = await window.cowork.askClaude(prompt, allData.length?allData:[])
+      console.log('Cowork response:', typeof raw, raw)
+      if(typeof raw==='string') rawText=raw
+      else if(raw?.text) rawText=raw.text
+      else if(Array.isArray(raw?.content)) rawText=raw.content.find(b=>b.type==='text')?.text||''
+      else if(raw?.content&&typeof raw.content==='string') rawText=raw.content
+      else if(raw?.response) rawText=raw.response
+      else rawText=JSON.stringify(raw)
+    } else {
+      // Mode Browser: panggil Anthropic API langsung
+      rawText = await callAnthropicDirect(prompt, imgArr)
+    }
+    const text = rawText
+    if(!text) throw new Error('Response AI kosong')
+
+    // Ekstrak JSON dari teks
+    let jsonStr = null
+    const m1 = text.match(/```json\s*([\s\S]*?)```/)
+    const m2 = text.match(/\{[\s\S]*\}/)
+    if(m1) jsonStr = m1[1].trim()
+    else if(m2) jsonStr = m2[0]
+    else throw new Error('Tidak ada JSON dalam response: '+text.substring(0,300))
+
+    const json = JSON.parse(jsonStr)
+    S.aiState='done'; S.aiResult=json; S.aiError=null; rapp()
+  } catch(e){
+    console.error('AI error:',e)
+    S.aiState='error'
+    S.aiError=e.message||String(e)
+    rapp()
+  }
+}
+
+// Validasi dimensi — tolak nilai di luar batas wajar box packaging
+function sanitizeDim(val, min, max){ return (val>0&&val>=min&&val<=max)?val:null }
+
+function applyAIResult(){
+  const r=S.aiResult; if(!r) return
+  if(r.bt) S.bt=r.bt
+  // Batas wajar: p/l 10-70cm, t 3-30cm
+  const sp=sanitizeDim(r.p,10,70), sl=sanitizeDim(r.l,10,70), st=sanitizeDim(r.t,3,30)
+  if(sp) S.p=sp
+  if(sl) S.l=sl
+  if(st) S.t=st
+  // Tandai kalau dimensi di-reject karena tidak masuk akal
+  if((r.p&&!sp)||(r.l&&!sl)||(r.t&&!st)){
+    r._dimWarning=`Dimensi AI (${r.p}×${r.l}×${r.t}cm) di luar batas wajar (10–70 × 10–70 × 3–30 cm) — diabaikan, isi manual`
+  }
+  if(r.ouId) S.ou=OM.find(m=>m.id===r.ouId)||S.ou
+  if(r.inId) S.in=IM.find(m=>m.id===r.inId)||S.in
+  if(r.rkId) S.rk=RM.find(m=>m.id===r.rkId)||S.rk
+  S.logo=r.logo||false
+  if(r.lp>0&&r.lp<=30) S.lp=r.lp
+  if(r.ll>0&&r.ll<=30) S.ll=r.ll
+  S.mag=r.mag||false
+  S.rib=r.rib||false
+  if(r.qty>0&&r.qty<=10000) S.qty=r.qty
+  S.aiApplied=true
+  S.step=2; rapp()
+}
+
+function fileIcon(name){
+  const ext=(name.split('.').pop()||'').toLowerCase()
+  if(['jpg','jpeg','png','webp','gif'].includes(ext)) return '🖼'
+  if(ext==='pdf') return '📕'
+  if(['doc','docx'].includes(ext)) return '📄'
+  if(ext==='txt') return '📝'
+  return '📎'
+}
+function fileSize(bytes){
+  if(bytes<1024) return bytes+'B'
+  if(bytes<1048576) return Math.round(bytes/1024)+'KB'
+  return (bytes/1048576).toFixed(1)+'MB'
+}
+
+function calc(s,skip=false){
+  const b=BT.find(x=>x.id===s.bt)
+  const panels=b.panels(s.p,s.l,s.t)
+  const bkd=[];let mT=0,gT=0
+  for(const pn of panels){
+    const a=pn.pw*pn.lw*pn.q
+    let mc=0
+    if(pn.m==='rk')mc=a*s.rk.p
+    else if(pn.m==='ou')mc=a*s.ou.p
+    else if(pn.m==='in')mc=a*s.in.p
+    else if(pn.m==='kr')mc=a*0.21
+    const gc=a*pn.g
+    bkd.push({n:pn.n,mc,gc,tot:mc+gc})
+    mT+=mc;gT+=gc
+  }
+  let aT=0
+  if(s.logo){const la=s.lp*s.ll;const lc=la*550+la*1.11*2;aT+=lc;bkd.push({n:'Logo Foil Emas',mc:la*550,gc:la*1.11*2,tot:lc})}
+  if(s.mag){aT+=2500;bkd.push({n:'Magnet Closure',mc:2500,gc:0,tot:2500})}
+  if(s.rib){aT+=1500;bkd.push({n:'Pita Ribbon',mc:1500,gc:0,tot:1500})}
+  const lab=Math.round(b.lab(s.p,s.l,s.t))
+  const sub=mT+gT+aT+lab,risk=sub*0.02,hpp=sub+risk+9500,base=hpp/0.60
+  const tiers=[
+    {lbl:'1 pcs',mn:1,mx:1,pr:r5(base)},
+    {lbl:'2 – 25 pcs',mn:2,mx:25,pr:r5(base*.90)},
+    {lbl:'26 – 50 pcs',mn:26,mx:50,pr:r5(base*.85)},
+    {lbl:'51 – 75 pcs',mn:51,mx:75,pr:r5(base*.80)},
+    {lbl:'76 – 100 pcs',mn:76,mx:100,pr:r5(base*.75)},
+  ]
+  const at=tiers.find(x=>s.qty>=x.mn&&s.qty<=x.mx)||tiers[4]
+  let alts=[]
+  if(!skip){
+    if(s.ou.p>3){const c=OM.find(m=>m.p<s.ou.p&&m.p>=0.7);if(c){const r=calc({...s,ou:c},true);const p=r.tiers.find(x=>s.qty>=x.mn&&s.qty<=x.mx)?.pr||r.tiers[4].pr;alts.push({lbl:'Versi Budget',desc:`${s.ou.n} → ${c.n}`,pr:p,diff:at.pr})}}
+    if(s.ou.p<15){const c=OM.find(m=>m.p>s.ou.p&&m.p>=15);if(c){const r=calc({...s,ou:c},true);const p=r.tiers.find(x=>s.qty>=x.mn&&s.qty<=x.mx)?.pr||r.tiers[4].pr;alts.push({lbl:'Upgrade Premium',desc:`${s.ou.n} → ${c.n}`,pr:p,diff:at.pr})}}
+    if(s.rk.p>1){const c=RM.find(m=>m.p<s.rk.p);if(c){const r=calc({...s,rk:c},true);const p=r.tiers.find(x=>s.qty>=x.mn&&s.qty<=x.mx)?.pr||r.tiers[4].pr;alts.push({lbl:'Rangka Lebih Ringan',desc:`${s.rk.n} → ${c.n}`,pr:p,diff:at.pr})}}
+  }
+  return{bkd,mT,gT,aT,lab,sub,risk,hpp,base,tiers,at,alts}
+}
+
+function box3d(p,l,t){
+  const sc=Math.min(4.5,100/Math.max(p,l,t,1))
+  const ox=55,oy=130,pw=p*sc,th=t*sc,dx=l*sc*.40,dy=l*sc*.24
+  const bl=[ox,oy],br=[ox+pw,oy],tr=[ox+pw,oy-th],tl=[ox,oy-th]
+  const brd=[br[0]+dx,br[1]-dy],trd=[tr[0]+dx,tr[1]-dy],tld=[tl[0]+dx,tl[1]-dy]
+  const vw=Math.ceil(ox+pw+dx+16),vh=Math.ceil(oy+8)
+  return`<svg viewBox="0 0 ${vw} ${vh}" style="width:100%;max-height:145px" aria-hidden="true">
+    <polygon points="${[bl,br,tr,tl].map(x=>x.join(',')).join(' ')}" fill="#C9A84C22" stroke="#C9A84C99" stroke-width="1"/>
+    <polygon points="${[br,brd,trd,tr].map(x=>x.join(',')).join(' ')}" fill="#C9A84C10" stroke="#C9A84C99" stroke-width="1"/>
+    <polygon points="${[tl,tr,trd,tld].map(x=>x.join(',')).join(' ')}" fill="#C9A84C35" stroke="#C9A84C99" stroke-width="1"/>
+    <text x="${ox+pw/2}" y="${oy-th/2+4}" text-anchor="middle" font-size="11" fill="#9A7B1A" font-weight="500">${p}cm</text>
+    <text x="${ox+pw+dx/2+2}" y="${oy-dy/2+3}" font-size="10" fill="#B8A898">${l}cm</text>
+    <text x="${ox-12}" y="${oy-th/2+4}" text-anchor="middle" font-size="10" fill="#B8A898" transform="rotate(-90,${ox-12},${oy-th/2})">${t}cm</text>
+  </svg>`
+}
+
+function rprog(){
+  return`<div class="prog">${STEPS.map((n,i)=>{const idx=i+1,cl=idx<S.step?'done':idx===S.step?'active':'todo'
+  return`<div class="ps"><div class="pd ${cl}">${idx<S.step?'✓':idx}</div><div class="pl ${cl==='active'?'active':''}">${n}</div></div>`
+  }).join('')}</div>`
+}
+
+function chipHtml(file,idx){
+  const isImg=['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)
+  const imgSrc=file._preview||''
+  return`<div class="chip">
+    ${isImg&&imgSrc?`<img src="${imgSrc}" class="img-preview" alt="">`:`<span class="chip-icon">${fileIcon(file.name)}</span>`}
+    <span class="chip-name" title="${file.name}">${file.name}</span>
+    <span style="font-size:10px;color:#B8A898;flex-shrink:0;margin-left:2px">${fileSize(file.size)}</span>
+    <button class="chip-x" data-rm="${idx}" title="Hapus">✕</button>
+  </div>`
+}
+
+function aiResultCard(){
+  const r=S.aiResult; if(!r) return ''
+  const row=(lbl,val)=>`<div class="ai-row"><span class="ai-row-lbl">${lbl}</span><span class="${val?'ai-row-val':'ai-blank'}">${val||'Tidak terdeteksi'}</span></div>`
+  const btName=r.bt?BT.find(b=>b.id===r.bt)?.name:null
+  const ouName=r.ouId?OM.find(m=>m.id===r.ouId)?.n:null
+  const inName=r.inId?IM.find(m=>m.id===r.inId)?.n:null
+  const rkName=r.rkId?RM.find(m=>m.id===r.rkId)?.n:null
+  const dim=(r.p&&r.l&&r.t)?`${r.p} × ${r.l} × ${r.t} cm`:null
+  const acc=[r.logo&&'Logo Foil Emas',r.mag&&'Magnet',r.rib&&'Ribbon'].filter(Boolean).join(', ')||null
+  return`<div class="ai-result">
+    <div class="ai-result-title">✨ AI mendeteksi spesifikasi berikut</div>
+    ${row('Tipe box',btName)}
+    ${row('Dimensi',dim)}
+    ${row('Material luar',ouName)}
+    ${row('Material dalam',inName)}
+    ${row('Rangka',rkName)}
+    ${row('Aksesoris',acc)}
+    ${r.qty?row('Kuantitas',r.qty+' pcs'):''}
+    ${r._dimWarning?`<p style="font-size:11px;color:#9A3B1A;background:#FEF0EE;padding:7px 10px;border-radius:7px;margin:.5rem 0;line-height:1.5">⚠️ ${r._dimWarning}</p>`:''}
+    ${r.catatan?`<p style="font-size:11px;color:#7A6658;margin:.5rem 0 .9rem;line-height:1.5;padding-top:.5rem;border-top:1px solid #F0EAD8">${r.catatan}</p>`:'<div style="margin-bottom:.9rem"></div>'}
+    <div style="display:flex;gap:8px">
+      <button class="btn-gold" id="ai-apply" style="flex:1;padding:10px">Gunakan hasil ini →</button>
+      <button class="btn-ghost" id="ai-clear" style="padding:10px 14px;font-size:13px">Reset</button>
+    </div>
+  </div>`
+}
+
+function rs1(){
+  const chips=S.files.map((f,i)=>chipHtml(f,i)).join('')
+  const hasFiles=S.files.length>0
+  const isLoading=S.aiState==='loading'
+  return`<div class="card"><div class="card-body">
+    <div class="step-title">Info project & brief client</div>
+    <div class="step-sub">Isi brief lalu biarkan AI membaca dan mengisi form otomatis</div>
+
+
+    <div class="df">
+      <label>Nama Client / Project <span style="color:#C9A84C">*</span></label>
+      <input type="text" id="cn" placeholder="Misal: PT Maju Jaya – Hampers Lebaran 2026" value="${S.clientName.replace(/"/g,'&quot;')}">
+    </div>
+
+    <div class="df">
+      <label>Brief <span style="font-weight:400;color:#B8A898">(opsional)</span></label>
+      <textarea id="bt" placeholder="Tulis atau paste brief dari client…&#10;&#10;Contoh: Box hampers premium untuk botol minum 15cm landscape. Warna navy/charcoal, logo foil emas, budget maks Rp 200.000/pcs, qty 100 pcs.">${S.briefText}</textarea>
+    </div>
+
+    <div class="df">
+      <label>File Referensi <span style="font-weight:400;color:#B8A898">(opsional)</span></label>
+      <div class="dz" id="dz">
+        <span class="dz-icon">📎</span>
+        <p class="dz-text">Drag &amp; drop atau <u>klik untuk pilih file</u></p>
+        <span class="dz-types">Foto produk · PDF · Word · Catatan · Screenshot</span>
+        <input type="file" id="fi" multiple accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.txt">
+      </div>
+      ${hasFiles?`<div class="chips" id="chips">${chips}</div>`:''}
+    </div>
+
+    <button class="ai-btn" id="ai-btn" ${!canAnalyze()||isLoading?'disabled':''}>
+      ${isLoading
+        ?`<span class="ai-spin"></span> ${S.files.some(f=>f.name.toLowerCase().endsWith('.pdf'))?'Merender PDF & menganalisis…':'Bella sedang membaca brief…'}`
+        :`✨ Analisis Brief dengan AI — isi form otomatis`}
+    </button>
+
+    ${S.aiState==='done'&&S.aiResult?aiResultCard():''}
+    ${S.aiState==='error'?`<div class="ai-err">
+      <strong>⚠️ Gagal menganalisis</strong><br>
+      <span style="font-size:11px;opacity:.85">${S.aiError||'Error tidak diketahui'}</span>
+    </div>`:''}
+
+  </div></div>`
+}
+
+const aiHint=`<span class="ai-hint">✨ AI</span>`
+function rs2(){
+  const aiBt=S.aiApplied&&S.aiResult?.bt
+  return`<div class="card"><div class="card-body">
+  <div class="step-title">Tipe box apa yang dibutuhkan?</div>
+  <div class="step-sub">${aiBt?`AI mendeteksi: <strong>${BT.find(b=>b.id===S.aiResult.bt)?.name}</strong> — konfirmasi atau ganti`:'Menentukan jumlah panel dan kerumitan produksi'}</div>
+  <div class="tg">${BT.map(b=>`<div class="tc ${S.bt===b.id?'sel':''} ${aiBt&&b.id===S.aiResult.bt&&S.bt===b.id?'ai-pre':''}" data-bt="${b.id}">
+    <span class="tc-icon">${b.icon}</span><h3>${b.name}${aiBt&&b.id===S.aiResult.bt?' '+aiHint:''}</h3><p>${b.desc}</p>
+  </div>`).join('')}</div>
+</div></div>`
+}
+
+function rs3(){return`<div class="card"><div class="card-body">
+  <div class="step-title">Masukkan dimensi box</div>
+  <div class="step-sub">Ukuran produk jadi — bukan ukuran bahan baku</div>
+  <div class="dr">
+    <div class="df"><label>Panjang (cm)</label><input type="number" id="ip" value="${S.p}" min="5" max="100" step=".5"></div>
+    <div class="df"><label>Lebar (cm)</label><input type="number" id="il" value="${S.l}" min="5" max="100" step=".5"></div>
+    <div class="df"><label>Tinggi (cm)</label><input type="number" id="it" value="${S.t}" min="1" max="50" step=".5"></div>
+  </div>
+  <div class="box-preview">${box3d(S.p,S.l,S.t)}</div>
+  <p class="box-note">Ilustrasi 3D · bukan skala</p>
+</div></div>`}
+
+function moHtml(m,sel,grp){
+  const s=sel&&sel.id===m.id
+  const [bd,bc]=m.p>=15?['Premium','badge-p']:m.p>=3?['Standar','badge-s']:['Ekonomis','badge-e']
+  return`<div class="mo ${s?'sel':''}" data-gp="${grp}" data-mid="${m.id}">
+    <div><div class="mo-name">${m.n}</div><div class="mo-cat">${m.c}</div></div>
+    <div class="mo-right"><div class="mo-price">Rp ${fCm2(m.p)}/cm²</div><span class="badge ${bc}">${bd}</span></div>
+  </div>`
+}
+
+function rs4(){return`<div class="card"><div class="card-body">
+  <div class="step-title">Pilih material</div>
+  <div class="step-sub">Komponen biaya terbesar — sesuaikan dengan target harga &amp; kualitas</div>
+  <div class="ms"><h4>Material Luar (Cover)</h4><div class="mg">${OM.map(m=>moHtml(m,S.ou,'ou')).join('')}</div></div>
+  <div class="ms"><h4>Material Dalam (Inner)</h4><div class="mg">${IM.map(m=>moHtml(m,S.in,'in')).join('')}</div></div>
+  <div class="ms"><h4>Rangka (Board)</h4><div class="mg">${RM.map(m=>moHtml(m,S.rk,'rk')).join('')}</div></div>
+</div></div>`}
+
+function rs5(){
+  const tog=(id,on)=>`<div class="tog ${on?'on':''}" data-tg="${id}"></div>`
+  const laCost=Math.round(S.lp*S.ll*550+S.lp*S.ll*1.11*2)
+  const laPreview=Math.round(8*8*550+8*8*1.11*2)  // preview default 8×8cm
+  return`<div class="card"><div class="card-body">
+  <div class="step-title">Aksesoris &amp; dekorasi</div>
+  <div class="step-sub">Ornamen tambahan — opsional</div>
+
+  <div class="ai"><div class="at" data-tg="logo">
+    <div>
+      <h4>Logo Foil Emas</h4>
+      <p>Rp 550/cm² (foil) · Rp 2,2/cm² (tinta) &nbsp;·&nbsp; <span style="color:#9A7B1A">contoh 8×8cm ≈ Rp ${f(laPreview)}</span></p>
+    </div>
+    ${tog('logo',S.logo)}
+  </div>
+  ${S.logo?`<div class="as">
+    <p style="font-size:11px;color:#7A6658;margin:0 0 8px">Masukkan ukuran area logo yang akan difoil</p>
+    <div class="dr" style="margin-bottom:.5rem">
+      <div class="df"><label>Panjang logo (cm)</label><input type="number" id="lp" value="${S.lp}" min="1" max="30"></div>
+      <div class="df"><label>Lebar logo (cm)</label><input type="number" id="ll" value="${S.ll}" min="1" max="30"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#FDF3D7;border-radius:8px;padding:8px 12px">
+      <span style="font-size:12px;color:#7A6658">${S.lp} × ${S.ll} cm = ${S.lp*S.ll} cm²</span>
+      <span style="font-size:13px;font-weight:600;color:#9A7B1A">+Rp ${f(laCost)}</span>
+    </div>
+  </div>`:''}
+  </div>
+
+  <div class="ai"><div class="at" data-tg="mag">
+    <div><h4>Magnet Closure</h4><p>Penutup magnetik &nbsp;·&nbsp; <span style="color:#9A7B1A">+Rp 2.500/unit</span></p></div>
+    ${tog('mag',S.mag)}
+  </div></div>
+
+  <div class="ai"><div class="at" data-tg="rib">
+    <div><h4>Pita Ribbon</h4><p>Pita dekoratif &nbsp;·&nbsp; <span style="color:#9A7B1A">+Rp 1.500/unit</span></p></div>
+    ${tog('rib',S.rib)}
+  </div></div>
+</div></div>`}
+
+function rs6(){
+  const ok=S.ou&&S.in&&S.rk&&S.bt
+  let prev=''
+  if(ok){
+    const r=calc(S)
+    prev=`<p class="section-lbl" style="margin-top:1rem">Preview harga per tier</p>
+    <div class="tp">${r.tiers.map(t=>{const a=S.qty>=t.mn&&S.qty<=t.mx
+    return`<div class="tr ${a?'at-tier':''}"><span class="t-lbl">${a?'▶ ':''}${t.lbl}</span><span class="t-price">Rp ${f(t.pr)}/pcs</span></div>`
+    }).join('')}</div>`
+  }
+  return`<div class="card"><div class="card-body">
+  <div class="step-title">Jumlah pesanan</div>
+  <div class="step-sub">Makin banyak, harga per pcs makin hemat</div>
+  <div class="qty-num">${S.qty}</div>
+  <div class="qty-lbl">pcs</div>
+  <input type="range" min="1" max="100" step="1" value="${S.qty}" id="qr">
+  <div class="tier-ticks"><span>1</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+  <div class="df" style="max-width:130px;margin:1rem auto 0"><label>Ketik jumlah</label><input type="number" id="qn" value="${S.qty}" min="1" max="500"></div>
+  ${prev}
+</div></div>`}
+
+function exportToPDF(){
+  const r=S.result, b=BT.find(x=>x.id===S.bt)
+  const date=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
+
+  const rows = [
+    ...r.bkd.map(x=>`<tr><td>${x.n}</td><td>Rp ${f(x.tot)}</td></tr>`),
+    `<tr><td>Tenaga kerja</td><td>Rp ${f(r.lab)}</td></tr>`,
+    `<tr><td>Resiko kerusakan (2%)</td><td>Rp ${f(r.risk)}</td></tr>`,
+    `<tr><td>Packaging</td><td>Rp 9.500</td></tr>`,
+    `<tr class="tot"><td><strong>Total HPP</strong></td><td><strong>Rp ${f(r.hpp)}</strong></td></tr>`,
+  ].join('')
+
+  const tierRows = r.tiers.map(t=>{
+    const a=t.mn===r.at.mn
+    return`<tr${a?' class="active"':''}><td>${a?'▶ ':''}${t.lbl}</td><td><strong>Rp ${f(t.pr)}/pcs</strong>${a?' ★':''}</td><td>Rp ${f(t.pr*S.qty)}</td></tr>`
+  }).join('')
+
+  const altRows = r.alts.map(a=>{
+    const d=a.pr-a.diff
+    return`<tr><td><strong>${a.lbl}</strong><br><small>${a.desc}</small></td><td>Rp ${f(a.pr)}/pcs</td><td style="color:${d>0?'#9A7B1A':'#2E7D6E'}">${d>0?'▲':'▼'} Rp ${f(Math.abs(d))}</td></tr>`
+  }).join('')
+
+  const html=`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">
+  <title>Estimasi Harga — ${S.clientName||'Susan Pro'}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11pt;color:#1A1A1A;background:#fff;padding:20mm 18mm}
+    h1{font-size:18pt;font-weight:700;color:#2C1A0E;margin-bottom:2px}
+    h2{font-size:11pt;font-weight:600;color:#2C1A0E;margin:14px 0 6px;border-bottom:1px solid #E8D89A;padding-bottom:4px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #C9A84C}
+    .logo{font-size:14pt;font-weight:700;color:#C9A84C;letter-spacing:-.5px}
+    .logo span{color:#2C1A0E}
+    .meta{font-size:9pt;color:#7A6658;text-align:right;line-height:1.6}
+    .hero{background:#FEF9EF;border:1.5px solid #E8D89A;border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .hero-price{font-size:26pt;font-weight:700;color:#2C1A0E}
+    .hero-price span{font-size:12pt;font-weight:400;color:#7A6658}
+    .hero-right{text-align:right}
+    .hero-total{font-size:11pt;color:#7A6658;margin-bottom:2px}
+    .hero-total strong{color:#2C1A0E;font-size:12pt}
+    .hero-hpp{font-size:8.5pt;color:#B8A898}
+    table{width:100%;border-collapse:collapse;font-size:9.5pt;margin-bottom:14px}
+    th{background:#F5F0E8;color:#5A3E2B;font-weight:600;padding:5px 8px;text-align:left;font-size:9pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    td{padding:4px 8px;border-bottom:1px solid #F0EBE3;vertical-align:top}
+    tr.tot td{font-weight:600;background:#F5F0E8;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    tr.active td{background:#FEF9EF;font-weight:600;color:#9A7B1A;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .brief-box{background:#F9F6F0;border-left:3px solid #C9A84C;padding:8px 12px;margin-bottom:14px;font-size:9.5pt;color:#5A3E2B;border-radius:0 6px 6px 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;font-size:9.5pt;margin-bottom:14px}
+    .spec-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #F0EBE3}
+    .spec-lbl{color:#7A6658}
+    .spec-val{font-weight:500}
+    .disclaimer{font-size:8pt;color:#B8A898;margin-top:14px;padding-top:10px;border-top:1px solid #E8E2D9;line-height:1.5}
+    small{color:#7A6658;font-size:8.5pt}
+    @media print{body{padding:15mm 15mm}@page{margin:0}}
+  </style></head><body>
+  <div class="header">
+    <div>
+      <div class="logo">Susan <span>Pro</span></div>
+      <div style="font-size:9pt;color:#7A6658;margin-top:2px">Estimasi Harga Packaging Premium</div>
+    </div>
+    <div class="meta">
+      ${S.clientName?`<div><strong>${S.clientName}</strong></div>`:''}
+      <div>${date}</div>
+      <div>${b.name} · ${S.p}×${S.l}×${S.t} cm</div>
+    </div>
+  </div>
+
+  ${S.briefText?`<div class="brief-box"><strong>Brief:</strong> ${S.briefText.substring(0,200)}${S.briefText.length>200?'…':''}</div>`:''}
+
+  <div class="hero">
+    <div>
+      <div style="font-size:8.5pt;color:#9A7B1A;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Harga Jual — ${r.at.lbl}</div>
+      <div class="hero-price">Rp ${f(r.at.pr)}<span>/pcs</span></div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-total">Total ${S.qty} pcs = <strong>Rp ${f(r.at.pr*S.qty)}</strong></div>
+      <div class="hero-hpp">HPP Rp ${f(r.hpp)} · Margin ~40%</div>
+    </div>
+  </div>
+
+  <h2>Spesifikasi Produk</h2>
+  <div class="spec-grid">
+    <div class="spec-row"><span class="spec-lbl">Tipe Box</span><span class="spec-val">${b.name}</span></div>
+    <div class="spec-row"><span class="spec-lbl">Dimensi</span><span class="spec-val">${S.p}×${S.l}×${S.t} cm</span></div>
+    <div class="spec-row"><span class="spec-lbl">Material Luar</span><span class="spec-val">${S.ou?.n||'-'}</span></div>
+    <div class="spec-row"><span class="spec-lbl">Material Dalam</span><span class="spec-val">${S.in?.n||'-'}</span></div>
+    <div class="spec-row"><span class="spec-lbl">Rangka</span><span class="spec-val">${S.rk?.n||'-'}</span></div>
+    <div class="spec-row"><span class="spec-lbl">Aksesoris</span><span class="spec-val">${[S.logo&&'Logo Foil',S.mag&&'Magnet',S.rib&&'Ribbon'].filter(Boolean).join(', ')||'-'}</span></div>
+  </div>
+
+  <h2>Harga per Tier Kuantitas</h2>
+  <table>
+    <tr><th>Kuantitas</th><th>Harga/pcs</th><th>Total (${S.qty} pcs)</th></tr>
+    ${tierRows}
+  </table>
+
+  <h2>Rincian Biaya Produksi</h2>
+  <table>
+    <tr><th>Komponen</th><th>Biaya</th></tr>
+    ${rows}
+  </table>
+
+  ${r.alts.length?`<h2>Rekomendasi Alternatif</h2>
+  <table>
+    <tr><th>Opsi</th><th>Harga/pcs</th><th>Selisih vs Utama</th></tr>
+    ${altRows}
+  </table>`:''}
+
+  <div class="disclaimer">
+    * Dokumen ini adalah <strong>estimasi harga</strong> berdasarkan kalkulasi internal Susan Pro 2026.
+    Harga final dapat berbeda setelah validasi spesifikasi lengkap oleh tim produksi.
+    Berlaku untuk pesanan dengan spesifikasi sesuai di atas.
+  </div>
+</body></html>`
+
+  const w=window.open('','_blank','width=800,height=900')
+  w.document.write(html)
+  w.document.close()
+  setTimeout(()=>{w.print()},400)
+}
+
+function rresult(){
+  const r=S.result,b=BT.find(x=>x.id===S.bt)
+  const hasBrief=S.briefText.trim().length>0
+  const hasFiles=S.files.length>0
+  return`<div class="result-wrap">
+  <div class="r-back">
+    <button id="bback2">← Hitung Ulang</button>
+    <span>${b.name} · ${S.p}×${S.l}×${S.t} cm · ${S.qty} pcs</span>
+    <button onclick="exportToPDF()" style="margin-left:auto;background:#fff;border:1.5px solid #E8E2D9;padding:6px 13px;border-radius:7px;font-size:12px;cursor:pointer;color:#2C1A0E;display:flex;align-items:center;gap:5px;white-space:nowrap" onmouseover="this.style.borderColor='#C9A84C'" onmouseout="this.style.borderColor='#E8E2D9'">
+      📄 Export PDF
+    </button>
+  </div>
+
+  ${S.clientName?`<div class="brief-summary">
+    <strong>Project</strong>
+    ${S.clientName}${hasBrief?`<br><span style="color:#7A6658">${S.briefText.substring(0,120)}${S.briefText.length>120?'…':''}</span>`:''}
+    ${hasFiles?`<br><span style="color:#9A7B1A;font-size:10px">📎 ${S.files.length} file referensi terlampir</span>`:''}
+  </div>`:''}
+
+  <div class="hero">
+    <div class="hero-lbl">Harga jual — ${r.at.lbl}</div>
+    <div class="hero-price">Rp ${f(r.at.pr)}<span>/pcs</span></div>
+    <div class="hero-total">Total ${S.qty} pcs = <strong>Rp ${f(r.at.pr*S.qty)}</strong></div>
+    <div class="hero-hpp">HPP Rp ${f(r.hpp)} · Margin ~40% · Gross ≈ Rp ${f(r.at.pr-r.hpp)}/pcs</div>
+  </div>
+
+  <p class="section-lbl">Harga semua tier</p>
+  <div class="tier-table">${r.tiers.map(t=>{const a=t.mn===r.at.mn
+  return`<div class="tier-row ${a?'active':''}">
+    <span style="color:${a?'#9A7B1A':'#7A6658'}">${a?'▶ ':''}${t.lbl}</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="t-p">Rp ${f(t.pr)}/pcs</span>
+      ${a?`<span class="t-badge">Terpilih</span>`:''}
+    </div>
+  </div>`}).join('')}</div>
+
+  <div class="breakdown">
+    <div class="bd-header ${S.bdOpen?'open':''}" id="bdh">
+      <span>Rincian biaya produksi</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#7A6658" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    ${S.bdOpen?`<div class="bd-body">
+      ${r.bkd.map(x=>`<div class="bd-row"><span>${x.n}</span><span>Rp ${f(x.tot)}</span></div>`).join('')}
+      <div class="bd-row"><span class="lbl">Tenaga kerja</span><span>Rp ${f(r.lab)}</span></div>
+      <div class="bd-row"><span class="lbl">Resiko kerusakan (2%)</span><span>Rp ${f(r.risk)}</span></div>
+      <div class="bd-row"><span class="lbl">Packaging</span><span>Rp 9.500</span></div>
+      <div class="bd-row tot"><span>Total HPP</span><span>Rp ${f(r.hpp)}</span></div>
+    </div>`:''}
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="m-lbl">Material</div><div class="m-val">Rp ${f(r.mT)}</div></div>
+    <div class="metric"><div class="m-lbl">Lem</div><div class="m-val">Rp ${f(r.gT)}</div></div>
+    <div class="metric"><div class="m-lbl">BTK</div><div class="m-val">Rp ${f(r.lab)}</div></div>
+  </div>
+
+  ${r.alts.length?`<p class="section-lbl">Rekomendasi alternatif</p>
+  <div class="alt-grid">${r.alts.slice(0,4).map(a=>{const d=a.pr-a.diff
+  return`<div class="alt-card">
+    <div class="alt-title">${a.lbl}</div>
+    <div class="alt-desc">${a.desc}</div>
+    <div class="alt-price">Rp ${f(a.pr)}/pcs</div>
+    <div class="alt-diff ${d>0?'alt-pricier':'alt-cheaper'}">${d>0?'▲':'▼'} Rp ${f(Math.abs(d))} vs pilihan utama</div>
+  </div>`}).join('')}</div>`:''}
+
+  <div class="disclaimer">
+    <strong>Catatan:</strong> Hasil ini adalah <strong>estimasi</strong> berbasis kalkulasi internal Susan Pro 2026.
+    Harga final dapat berbeda setelah validasi spesifikasi oleh tim produksi.
+  </div>
+</div>`
+}
+
+function rnav(){
+  const ok=S.clientName.trim().length>0
+  const c=[ok,!!S.bt,S.p>0&&S.l>0&&S.t>0,!!(S.ou&&S.in&&S.rk),true,!!(S.ou&&S.in&&S.rk&&S.bt)][S.step-1]
+  return`<div class="nav">
+    ${S.step>1?`<button class="btn-ghost" id="bback">← Kembali</button>`:'<span></span>'}
+    <button class="btn-gold" id="bnext" ${!c?'disabled':''}>
+      ${S.step===6?'Hitung Harga 🧮':'Lanjut →'}
+    </button>
+  </div>`
+}
+
+function rapp(){
+  const root=document.getElementById('root')
+  if(S.step>6){
+    root.innerHTML=rresult()
+  } else {
+    const fns=[rs1,rs2,rs3,rs4,rs5,rs6]
+    root.innerHTML=rprog()+fns[S.step-1]()+rnav()
+  }
+  bind()
+}
+
+function addFiles(newFiles){
+  for(const file of Array.from(newFiles)){
+    if(S.files.find(f=>f.name===file.name&&f.size===file.size)) continue
+    if(['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)){
+      const reader=new FileReader()
+      reader.onload=e=>{file._preview=e.target.result;rapp();updateAiBtn()}
+      reader.readAsDataURL(file)
+    }
+    S.files.push(file)
+  }
+  rapp()
+  updateAiBtn()
+}
+
+function bind(){
+  // Brief step
+  const cn=document.getElementById('cn'),bt=document.getElementById('bt')
+  const fi=document.getElementById('fi'),dz=document.getElementById('dz')
+  if(cn){
+    cn.addEventListener('input',e=>{S.clientName=e.target.value;
+      document.getElementById('bnext')&&(document.getElementById('bnext').disabled=!S.clientName.trim())})
+  }
+  if(bt) bt.addEventListener('input',e=>{
+    S.briefText=e.target.value
+    updateAiBtn()
+  })
+  if(fi) fi.addEventListener('change',e=>{addFiles(e.target.files);fi.value=''})
+  if(dz){
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')})
+    dz.addEventListener('dragleave',()=>dz.classList.remove('over'))
+    dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');addFiles(e.dataTransfer.files)})
+  }
+  document.querySelectorAll('[data-rm]').forEach(el=>el.addEventListener('click',e=>{
+    e.stopPropagation();S.files.splice(parseInt(el.dataset.rm),1);rapp()
+  }))
+
+  // Box types
+  document.querySelectorAll('[data-bt]').forEach(el=>el.addEventListener('click',()=>{S.bt=el.dataset.bt;rapp()}))
+
+  // Materials
+  document.querySelectorAll('[data-gp]').forEach(el=>el.addEventListener('click',()=>{
+    const g=el.dataset.gp,id=el.dataset.mid
+    if(g==='ou')S.ou=OM.find(m=>m.id===id)
+    else if(g==='in')S.in=IM.find(m=>m.id===id)
+    else S.rk=RM.find(m=>m.id===id)
+    rapp()
+  }))
+
+  // Dimensions
+  const g=(id,cb)=>{const el=document.getElementById(id);if(el)el.addEventListener('input',cb)}
+  g('ip',e=>{S.p=parseFloat(e.target.value)||30;rapp()})
+  g('il',e=>{S.l=parseFloat(e.target.value)||30;rapp()})
+  g('it',e=>{S.t=parseFloat(e.target.value)||5;rapp()})
+
+  // Accessories
+  document.querySelectorAll('[data-tg]').forEach(el=>el.addEventListener('click',()=>{S[el.dataset.tg]=!S[el.dataset.tg];rapp()}))
+  g('lp',e=>{S.lp=parseFloat(e.target.value)||8;rapp()})
+  g('ll',e=>{S.ll=parseFloat(e.target.value)||8;rapp()})
+
+  // Qty
+  g('qr',e=>{S.qty=parseInt(e.target.value);rapp()})
+  g('qn',e=>{S.qty=parseInt(e.target.value)||1;rapp()})
+
+  // API key save (hanya di browser mode)
+  const saveKey=document.getElementById('save-key')
+  if(saveKey) saveKey.addEventListener('click',()=>{
+    const val=document.getElementById('api-key-input')?.value?.trim()||''
+    API_KEY=val
+    localStorage.setItem('sp_api_key', val)
+    rapp()
+  })
+
+  // AI
+  const aiBtn=document.getElementById('ai-btn')
+  const aiApply=document.getElementById('ai-apply')
+  const aiClear=document.getElementById('ai-clear')
+  if(aiBtn) aiBtn.addEventListener('click',()=>analyzeWithAI())
+  if(aiApply) aiApply.addEventListener('click',()=>applyAIResult())
+  if(aiClear) aiClear.addEventListener('click',()=>{S.aiState=null;S.aiResult=null;S.aiApplied=false;rapp();updateAiBtn()})
+
+  // Nav
+  const bnext=document.getElementById('bnext'),bback=document.getElementById('bback')
+  const bback2=document.getElementById('bback2'),bdh=document.getElementById('bdh')
+  if(bnext)bnext.addEventListener('click',()=>{S.step===6?(S.result=calc(S),S.step=7):S.step++;rapp()})
+  if(bback)bback.addEventListener('click',()=>{S.step--;rapp()})
+  if(bback2)bback2.addEventListener('click',()=>{S.step=1;S.result=null;S.bdOpen=false;rapp()})
+  if(bdh)bdh.addEventListener('click',()=>{S.bdOpen=!S.bdOpen;rapp()})
+}
+
+rapp()
+</script>
+</body>
+</html>
+
+ 
