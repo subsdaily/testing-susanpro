@@ -202,57 +202,79 @@ const STEPS=['Brief','Tipe Box','Dimensi','Material','Aksesoris','Kuantitas']
 // Slorok & Hampers: rangka+kraft dikoreksi, pelapis masih estimasi
 
 const BT=[
-  {id:'flap',icon:'📦',name:'Box Flap',desc:'Tutup depan, paling umum',
+  // ── AB (Atas Bawah) ──────────────────────────────────────────────────────
+  // Dikonfirmasi 31 Mei 2026 dari Corporate 2026.xlsx & BOX 1an 2026.xlsx:
+  // Dua bagian terpisah (tutup diangkat). Rgk Ats + Rgk Bwh. TANPA magnet.
+  // Panel formula diturunkan dari sheet "AB 25x20x3 Vn+BC":
+  //   Pel ats luar  pw=p+t, lw=l+t  (wrap satu lapis)
+  //   Pel bwh luar  pw=p+t+12, lw=l+t+12 (base wrap lebih dalam)
+  {id:'ab',icon:'🎁',name:'Box Atas Bawah (AB)',desc:'Tutup diangkat (lift-off lid) — tanpa magnet',
    panels:(p,l,t)=>[
-    // Rangka: +1cm saja (toleransi potong) — verified dari data
+    {n:'Rgk Atas – Muka',m:'rk',pw:p+0.5,lw:l+0.5,q:1,g:0},
+    {n:'Rgk Atas – Sisi',m:'rk',pw:t,lw:p+0.5,q:4,g:0},
+    {n:'Rgk Bawah – Muka',m:'rk',pw:p,lw:l,q:1,g:0},
+    {n:'Rgk Bawah – Sisi',m:'rk',pw:t,lw:l,q:4,g:0},
+    {n:'Pel Atas Luar',m:'ou',pw:p+t,lw:l+t,q:1,g:1.11},
+    {n:'Pel Atas Dlm',m:'in',pw:p+t-1,lw:l+t-1,q:1,g:1.11},
+    {n:'Pel Bawah Luar',m:'ou',pw:p+t+12,lw:l+t+12,q:1,g:1.11},
+    {n:'Pel Bawah Dlm',m:'in',pw:p+t+11,lw:l+t+11,q:1,g:1.11}
+   ],lab:()=>38000},  // rakit 8rb + pel 30rb = 38rb (tanpa magnet, verified dari file)
+
+  // ── Flap / Dos ───────────────────────────────────────────────────────────
+  // Verified dari BOX 1an 2026.xlsx. Ada Rgk Sabuk + Magnet (toggle aksesoris).
+  {id:'flap',icon:'📦',name:'Box Flap / Dos',desc:'Tutup flap + magnet closure — tampilan premium',
+   panels:(p,l,t)=>[
     {n:'Rangka Tutup',m:'rk',pw:p+1,lw:l+1,q:1,g:0},
     {n:'Rangka Alas',m:'rk',pw:p,lw:l,q:1,g:0},
     {n:'Rangka Samping',m:'rk',pw:t,lw:l,q:4,g:0},
-    // Kraft: 0 allowance — verified (bukan +6cm)
     {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},
-    // Pel Luar: wrap keliling semua sisi tutup — verified dari BOX 1an
-    // pw = p*2 + t*2 + 7 (wrap full), lw = l + 6 (fold 3cm tiap sisi)
     {n:'Pelapis Luar',m:'ou',pw:p*2+t*2+7,lw:l+6,q:1,g:1.11},
-    // Pel strip dinding dalam
     {n:'Pel Strip',m:'ou',pw:t+l+6,lw:l+3,q:1,g:1.11},
-    // Dalam: formula sama dengan Slip In
     {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:1,g:1.11}
-   ],lab:()=>44000},  // verified dari file: rakit 8rb+pel 35rb+pbb 1rb=44rb (tanpa magnet)
-  {id:'slip_in',icon:'🗂',name:'Box Slip In',desc:'Sliding masuk, elegan',
+   ],lab:()=>44000},  // rakit 8rb + pel 35rb + pbb 1rb = 44rb (tanpa magnet — magnet di aksesoris)
+
+  // ── Slip In ──────────────────────────────────────────────────────────────
+  // Verified dari Box Slip in 2026.xlsx (30×30×5).
+  {id:'slip_in',icon:'🗂',name:'Box Slip In',desc:'Insert sliding dari sisi terbuka — elegan',
    panels:(p,l,t)=>[
-    // Semua formula tervalidasi dari file Box Slip In 30×30×5
-    {n:'Rangka Atas/Bawah',m:'rk',pw:p,lw:l,q:2,g:0},       // 0 allowance
-    {n:'Rangka Samping',m:'rk',pw:t,lw:l,q:4,g:0},           // 0 allowance
-    {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},           // 0 allowance — verified
-    {n:'Pel Luar Bawah',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},  // verified ✓
-    {n:'Pel Luar Atas',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},   // verified ✓
-    {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:1,g:1.11}     // verified ✓
-   ],lab:()=>35000},  // verified dari file: flat Rp 35.000 untuk ~30×30×5
-  {id:'slorok',icon:'🪣',name:'Box Slorok',desc:'Laci/drawer, statement',
+    {n:'Rangka Atas/Bawah',m:'rk',pw:p,lw:l,q:2,g:0},
+    {n:'Rangka Samping',m:'rk',pw:t,lw:l,q:4,g:0},
+    {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},
+    {n:'Pel Luar Bawah',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},
+    {n:'Pel Luar Atas',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},
+    {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:1,g:1.11}
+   ],lab:()=>35000},
+
+  // ── Slorok ───────────────────────────────────────────────────────────────
+  // Dari Corporate 2026.xlsx. Pelapis masih estimasi (belum tervalidasi penuh).
+  {id:'slorok',icon:'🪣',name:'Box Slorok',desc:'Laci/drawer geser — statement look',
    panels:(p,l,t)=>[
-    // Rangka: +0-1cm (dikoreksi dari +4-6cm)
     {n:'Rangka Selongsong',m:'rk',pw:p+1,lw:l+1,q:2,g:0},
     {n:'Rangka Laci',m:'rk',pw:p,lw:t,q:2,g:0},
-    {n:'Skat Dalam',m:'rk',pw:p,lw:l,q:1,g:0},
-    // Kraft: 0 allowance (dikoreksi dari +6cm)
+    {n:'Sekat Dalam',m:'rk',pw:p,lw:l,q:1,g:0},
     {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},
-    // Pelapis: estimasi (belum tervalidasi dari file — perlu konfirmasi Susan Pro)
     {n:'Pel Selongsong',m:'ou',pw:p+t*2+16,lw:l+t*2+34,q:1,g:1.11},
     {n:'Pel Laci Luar',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},
     {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:2,g:1.11}
    ],lab:(p,l,t)=>50000+p*l*t*0.06},
-  {id:'hampers',icon:'🎁',name:'Box Hampers',desc:'Box besar gift set',
+
+  // ── Frame / Pigura ───────────────────────────────────────────────────────
+  // Dari Frame 2026.xlsx. Estimasi panel untuk bingkai foto.
+  {id:'frame',icon:'🖼',name:'Frame / Pigura',desc:'Bingkai foto — Single, Twin, atau Triple',
    panels:(p,l,t)=>[
-    // Rangka: 0 allowance (dikoreksi)
-    {n:'Rangka Utama',m:'rk',pw:p,lw:l,q:2,g:0},
-    {n:'Rangka Samping',m:'rk',pw:t,lw:l,q:4,g:0},
-    // Kraft: 0 allowance (dikoreksi dari +8cm)
-    {n:'Kraft Embos',m:'kr',pw:p,lw:l,q:2,g:1.33},
-    // Pelapis: estimasi mengacu formula Flap
-    {n:'Pelapis Luar',m:'ou',pw:p*2+t*2+7,lw:l+6,q:1,g:1.11},
-    {n:'Pel Tutup',m:'ou',pw:p+t+10.5,lw:l+t*2+34,q:1,g:1.11},
-    {n:'Pelapis Dalam',m:'in',pw:p+t+8.5,lw:l+t*2+32,q:1,g:1.11}
-   ],lab:(p,l,t)=>55000+p*l*t*0.10},
+    {n:'Rangka Frame',m:'rk',pw:p+2,lw:l+2,q:2,g:0},
+    {n:'Pelapis Luar',m:'ou',pw:p+6,lw:l+6,q:1,g:1.11},
+    {n:'Pelapis Dalam',m:'in',pw:p+4,lw:l+4,q:1,g:1.11}
+   ],lab:()=>25000},
+
+  // ── Menu / Holder ────────────────────────────────────────────────────────
+  // Dari MENU 2026.xlsx. Panel estimasi untuk cover + casing.
+  {id:'menu',icon:'📋',name:'Menu / Holder',desc:'Menu holder, map dokumen, document keeper',
+   panels:(p,l,t)=>[
+    {n:'Rangka Cover',m:'rk',pw:p+1,lw:l+1,q:2,g:0},
+    {n:'Pelapis Cover',m:'ou',pw:p+6,lw:l+8,q:2,g:1.11},
+    {n:'Pelapis Dalam',m:'in',pw:p+4,lw:l+6,q:2,g:1.11}
+   ],lab:()=>28000},
 ]
 
 const OM=[
@@ -469,7 +491,7 @@ async function analyzeWithAI(){
   const inOpts=['blinen=Black Linen Rp1.3/cm²','fur100=Furing 100 Rp0.7/cm²',
     'fur50=Furing 50 Rp0.3/cm²','ac230=Art Carton 230 Rp0.6/cm²','dc250=DC 250 Rp0.4/cm²'].join(', ')
   const rkOpts='mdf3=MDF 3mm rigid premium Rp3.5/cm², gb1500=Grey Board 1500 hard Rp2.5/cm², gb30=Grey Board 30 medium Rp1.7/cm², chip350=Chipboard ringan Rp1/cm²'
-  const btOpts='flap=box tutup depan, slip_in=box sliding masuk, slorok=box laci/drawer, hampers=box besar hampers'
+  const btOpts='ab=box atas-bawah lift-off lid tanpa magnet, flap=box tutup flap+magnet closure premium, slip_in=box sliding masuk dari sisi terbuka, slorok=box laci/drawer geser, frame=bingkai foto pigura, menu=menu holder map dokumen'
 
   const briefSection=S.briefText.trim()?`BRIEF TEKS CLIENT:\n"${S.briefText}"\n\n`:''
   const fileSection=fileSections.length?`FILE REFERENSI:\n${fileSections.join('\n\n')}\n\n`:''
@@ -800,10 +822,10 @@ function rs5(){
   </div>`:''}
   </div>
 
-  <div class="ai"><div class="at" data-tg="mag">
+  ${S.bt==='flap'?`<div class="ai"><div class="at" data-tg="mag">
     <div><h4>Magnet Closure</h4><p>Penutup magnetik &nbsp;·&nbsp; <span style="color:#9A7B1A">+Rp 2.500/unit</span></p></div>
     ${tog('mag',S.mag)}
-  </div></div>
+  </div></div>`:`<div style="background:#F5F0E8;border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:12px;color:#9A7B1A;border:1px solid #E8D8B8">💡 Magnet closure hanya tersedia untuk tipe <strong>Flap / Dos</strong></div>`}
 
   <div class="ai"><div class="at" data-tg="rib">
     <div><h4>Pita Ribbon</h4><p>Pita dekoratif &nbsp;·&nbsp; <span style="color:#9A7B1A">+Rp 1.500/unit</span></p></div>
